@@ -1,0 +1,130 @@
+filter:
+	timestep: daily
+	output:
+		format: csv
+		path: "../out/test"
+		filename: "spatial_data_point_stratumvar"
+	stratum:
+		ids: 1
+        variables: plantc = cs.leafc+cs.live_stemc+cs.dead_stemc
+        
+filter:
+	timestep: daily
+	output:
+		format: csv
+		path: "../out/test"
+		filename: "spatial_data_point_patchvar"
+	patch:
+		ids: 1
+		variables: snowpack = snowpack.water_equivalent_depth,
+		           burn,
+		           elevation=z 	
+				
+filter:
+	timestep: daily
+	output:
+		format: csv
+		path: "../out/test"
+		filename: "cube_agg_c"
+	stratum:
+		ids: 1
+		variables:
+				trans= transpiration_sat_zone+transpiration_unsat_zone,
+                netpsn = cs.net_psn,
+				 height = epv.height,
+				 leafC = cs.leafc + cs.leafc_store,
+				 stemC = cs.live_stemc + cs.dead_stemc,
+				 rootC = cs.frootc + cs.live_crootc + cs.dead_crootc,
+				 burnC = fe.canopy_target_prop_c_consumed,
+				 mortC = fe.canopy_target_prop_mort
+               
+                
+                
+filter:
+	timestep: daily
+	output:
+		format: csv
+		path: "../out/test"
+		filename: "cube_agg_p"
+	patch:
+		ids: 1
+		variables:
+        litterc = litter_cs.totalc, 
+		burn,
+		soilc = soil_cs.totalc, 
+		depthToGW = sat_deficit_z, 
+		snowpack = snowpack.water_equivalent_depth, 
+		evap=evaporation_surf+exfiltration_unsat_zone+exfiltration_sat_zone, 
+		canopyevap = evaporation,
+		family_pct_cover,
+		streamflow,
+		rootdepth = rootzone.depth,
+		VegAccessWater = rz_storage,
+		Qin, 
+		Qout
+
+				
+filter:
+	timestep: daily
+	output:
+		format: csv
+		path: "../out/test"
+		filename: "cube_data_point_c_over"
+	stratum:
+		ids: 1:1:1:1:1
+		variables: burnCOver = fe.canopy_target_prop_c_consumed,
+				 mortCOver= fe.canopy_target_prop_mort,
+				 netpsnOver = cs.net_psn,
+				 heightOver = epv.height,
+				 transOver = transpiration_sat_zone+transpiration_unsat_zone,
+				 leafCOver = cs.leafc + cs.leafc_store,
+				 stemCOver = cs.live_stemc + cs.dead_stemc,
+				 rootCOver = cs.frootc + cs.live_crootc + cs.dead_crootc,
+				 rootdepthCOver = rootzone.depth
+				 
+				 
+filter:
+	timestep: daily
+	output:
+		format: csv
+		path: "../out/test"
+		filename: "cube_data_point_c_under"
+	stratum:
+		ids: 1:1:1:1:2, 1:1:1:2:2
+		variables:  burnCUnder = fe.canopy_subtarget_prop_c_consumed, 
+				mortCUnder = fe.canopy_subtarget_prop_mort,
+				transUnder = transpiration_sat_zone+transpiration_unsat_zone,
+				 netpsnUnder = cs.net_psn,
+				 heightUnder = epv.height
+				 leafCUnder = cs.leafc + cs.leafc_store,
+				 stemCUnder = cs.live_stemc + cs.dead_stemc,
+				 rootCUnder = cs.frootc + cs.live_crootc + cs.dead_crootc,
+				 rootdepthCUnder = rootzone.depth
+				
+filter:
+	timestep: daily
+	output:
+		format: csv
+		path: "../out/test"
+		filename: "cube_data_point_p"
+	patch:
+		ids: 1:1:1:1, 1:1:1:2 
+		variables: family_pct_cover,
+		    litterc = litter_cs.totalc, 
+		    burn, 
+		    soilc=soil_cs.totalc, 
+		    depthToGW = sat_deficit_z, 
+		    snowpack = snowpack.water_equivalent_depth,
+		    canopyevap = evaporation,
+		    family_pct_cover,
+		    streamflow,
+		    rootdepth = rootzone.depth,
+		    groundevap = evaporation_surf+exfiltration_unsat_zone+exfiltration_sat_zone, 
+		    VegAccessWater = rz_storage,
+		    Qin, 
+		    Qout
+
+
+
+
+
