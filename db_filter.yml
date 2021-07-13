@@ -18,8 +18,34 @@ filter:
 		ids: 1
 		variables: snowpack = snowpack.water_equivalent_depth,
 		           burn,
-		           elevation=z 	
-				
+		           elevation=z,
+		           rain = total_water_in 	
+		           
+filter:
+	timestep: daily
+	output:
+		format: csv
+		path: "../out/test"
+		filename: "cube_agg_p"
+	basin:
+		ids: 1
+		variables: 
+		patch.litter_cs.totalc, 
+		patch.burn,
+		patch.soil_cs.totalc, 
+		patch.sat_deficit_z, 
+		patch.snowpack.water_equivalent_depth, 
+		patch.evaporation_surf,
+		patch.exfiltration_unsat_zone,
+		patch.exfiltration_sat_zone, 
+		patch.evaporation,
+		patch.family_pct_cover, 
+		patch.streamflow,
+		patch.rootzone.depth,
+		patch.rz_storage,
+		patch.Qin, 
+		patch.Qout
+
 filter:
 	timestep: daily
 	output:
@@ -28,41 +54,15 @@ filter:
 		filename: "cube_agg_c"
 	stratum:
 		ids: 1
-		variables:
-				trans= transpiration_sat_zone+transpiration_unsat_zone,
+		variables: trans= transpiration_sat_zone + transpiration_unsat_zone,
                 netpsn = cs.net_psn,
 				 height = epv.height,
 				 leafC = cs.leafc + cs.leafc_store,
 				 stemC = cs.live_stemc + cs.dead_stemc,
 				 rootC = cs.frootc + cs.live_crootc + cs.dead_crootc,
-				 burnC = fe.canopy_target_prop_c_consumed,
-				 mortC = fe.canopy_target_prop_mort
-               
-                
-                
-filter:
-	timestep: daily
-	output:
-		format: csv
-		path: "../out/test"
-		filename: "cube_agg_p"
-	patch:
-		ids: 1
-		variables:
-        litterc = litter_cs.totalc, 
-		burn,
-		soilc = soil_cs.totalc, 
-		depthToGW = sat_deficit_z, 
-		snowpack = snowpack.water_equivalent_depth, 
-		evap=evaporation_surf+exfiltration_unsat_zone+exfiltration_sat_zone, 
-		canopyevap = evaporation,
-		family_pct_cover,
-		streamflow,
-		rootdepth = rootzone.depth,
-		VegAccessWater = rz_storage,
-		Qin, 
-		Qout
-
+				 consumedC = fe.canopy_target_prop_c_consumed,
+				 mortC = fe.canopy_target_prop_c_remain_adjusted + fe.canopy_target_prop_c_remain_adjusted_leafc
+		
 				
 filter:
 	timestep: daily

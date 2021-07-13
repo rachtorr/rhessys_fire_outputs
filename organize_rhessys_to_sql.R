@@ -3,6 +3,7 @@
 #setwd("~/fire/")
 setwd("~/Documents/BigCreek7.2ForExample/out/test/")
 library(tidyverse)
+library(tm)
 
 # need to update all for climate scenario with cliamte ID in data frames
 
@@ -26,57 +27,58 @@ all_sdp <- inner_join(sdp_p, sdp_c_patch,
 #################################################################
 
 # next table is aggcube
+
 # need to separate over and unders 
 # some of the outputs are missing
 aggc_p <- read.csv("cube_agg_p.csv")
 aggc_c <- read.csv("cube_agg_c.csv")
 
 # grouping by date only 
-aggc_p_summed <- aggc_p %>% 
-  mutate(date = as.Date(paste(year, month, day, sep="/"))) %>%
-  group_by(date) %>% 
-  summarize_at(vars(litterc, burn, soilc, evap, canopyevap, streamflow, Qin, Qout), list(sum))
-
-aggc_p_avgd <- aggc_p %>% 
-  mutate(date = as.Date(paste(year, month, day, sep="/"))) %>%
-  group_by(date) %>% 
-  summarize_at(vars(depthToGW, family_pct_cover, snowpack, VegAccessWater, rootdepth), list(mean))
-
-aggc_p_grouped <- inner_join(aggc_p_summed, aggc_p_avgd)
-
-# need to double check this - overstory is 1, understory is 2
-aggc_over <- aggc_c %>% dplyr::filter(stratumID==1) %>%
-  mutate(date = as.Date(paste(year, month, day, sep="/"))) %>%
-  dplyr::select(-month, -day, -year,
-                -basinID, -hillID, -zoneID, -patchID, -stratumID) %>% 
-  group_by(date) %>% 
-  summarize_all(sum) 
-
-n = ncol(aggc_over)
-overnames <- paste(names(aggc_over)[2:n], "Over", sep="")
-colnames(aggc_over)[2:n] <- overnames
+aggc_p_grouped <- aggc_p %>% 
+  mutate(date = as.Date(paste(year, month, day, sep="/"))) %>% 
+  mutate(groundevap = evaporation_surf + 
+           exfiltration_unsat_zone +
+           exfiltration_sat_zone) %>%
+  dplyr::select(-basinID, -day, -month, -year,
+                -evaporation_surf, -exfiltration_unsat_zone, -exfiltration_sat_zone) 
   
-aggc_under <- aggc_c %>% dplyr::filter(stratumID==2) %>%
+
+colnames(aggc_p_grouped) <- c("litterc", 
+                              "burn",
+                              "soilc",
+                              "depthToGW",
+                              "snowpack",
+                              "canopyevap",
+                              "coverfract", 
+                              "streamflow", 
+                              "rootdepth",
+                              "VegAccessWater",
+                              "Qin", 
+                              "Qout",
+                              "date",
+                              "groundevap")
+
+# group stratum into over and under 
+aggc_avg <- aggc_c %>% 
   mutate(date = as.Date(paste(year, month, day, sep="/"))) %>%
   dplyr::select(-month, -day, -year,
-                -basinID, -hillID, -zoneID, -patchID, -stratumID) %>% 
-  group_by(date) %>% 
-  summarize_all(sum)
+                -basinID, -hillID, -zoneID, -patchID) %>% 
+  group_by(date, stratumID) %>% 
+  summarize_all(mean) 
 
-n = ncol(aggc_under)
-undernames <- paste(names(aggc_under)[2:n], "Under", sep="")
-colnames(aggc_under)[2:n] <- undernames
+overunder <- pivot_wider(aggc_avg, names_from=stratumID, values_from=c(trans, netpsn, height, leafC, stemC, rootC, consumedC, mortC), names_prefix=c("Over","Under"), names_sep = "")
+colnames(overunder) <- removeNumbers(names(overunder))
 
-cube_agg <- inner_join(aggc_over, aggc_under, by="date")
-cube_agg <- inner_join(cube_agg, aggc_p_grouped, by="date")
+cube_agg <- inner_join(aggc_p_grouped,  overunder, by="date")
+
+# root depth is patch output - not separated into over under here
+
 # whats missing:
 # [id] int PRIMARY KEY,
 # [dateIdx] [key],
 # [warmingIdx] [key],
 # [rain] float8 NOT NULL,
 # [snowfall] float8 NOT NULL,
-
-# what is agg cube actually is it sum, avg, etc?? 
 
 ############################################################
 # cube_data_point table 
