@@ -5,7 +5,7 @@ setwd("~/Documents/BigCreek7.2ForExample/out/test/")
 library(tidyverse)
 library(tm)
 
-# need to update all for climate scenario with cliamte ID in data frames
+# need to update all for climate scenario with climate ID in data frames
 
 #################################################################
 # first table - spatial data point 
@@ -52,9 +52,10 @@ colnames(aggc_p_grouped) <- c("litterc",
                               "coverfract", 
                               "streamflow", 
                               "rootdepth",
-                              "VegAccessWater",
+                              "vegAccessWater",
                               "Qin", 
                               "Qout",
+                              "rain",
                               "date",
                               "groundevap")
 
@@ -66,7 +67,7 @@ aggc_avg <- aggc_c %>%
   group_by(date, stratumID) %>% 
   summarize_all(mean) 
 
-overunder <- pivot_wider(aggc_avg, names_from=stratumID, values_from=c(trans, netpsn, height, leafC, stemC, rootC, consumedC, mortC), names_prefix=c("Over","Under"), names_sep = "")
+overunder <- pivot_wider(aggc_avg, names_from=stratumID, values_from=c(trans, netpsn, height, leafC, stemC, rootC, consumedC, mortC, rootdepthC), names_prefix=c("Over","Under"), names_sep = "")
 colnames(overunder) <- removeNumbers(names(overunder))
 
 cube_agg <- inner_join(aggc_p_grouped,  overunder, by="date")
@@ -77,8 +78,10 @@ cube_agg <- inner_join(aggc_p_grouped,  overunder, by="date")
 # [id] int PRIMARY KEY,
 # [dateIdx] [key],
 # [warmingIdx] [key],
-# [rain] float8 NOT NULL,
+# [rain] float8 NOT NULL, - this is included, total_water_in = rain + snow + irr; may want to separate out rain and snow though
 # [snowfall] float8 NOT NULL,
+# rootdepthOver
+# rootdepthUnder - these are output as stratum.rootzone.depth, not sure if correct var 
 
 ############################################################
 # cube_data_point table 
@@ -119,7 +122,7 @@ allcube_dp <- right_join(overunder, cube_p_grouped)
 #   [dateIdx] [key],
 #   [cubeIdx] int,
 #   [warmingIdx] [key],
-#   [rain] float8 NOT NULL,
+#   [rain] float8 NOT NULL, - included as total_water_in
 #   [snowfall] float8 NOT NULL
 # )
 # also ask about percent_cover - might not be family output
