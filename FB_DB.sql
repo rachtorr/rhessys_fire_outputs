@@ -1,11 +1,10 @@
 CREATE TABLE [spatial_data_point] (
   [id] int PRIMARY KEY IDENTITY(1, 1),
   [warmingIdx] [key],
-  [patchIdx] [key],
+  [patchfamilyIdx] [key],
   [dateIdx] [key],
   [snowpack] float8 NOT NULL,
   [plantC] float8 NOT NULL,
-  [burn] float8 NOT NULL,
   [elevation] int
 )
 GO
@@ -38,11 +37,11 @@ CREATE TABLE [aggcube_data_point] (
   [leafCUnder] float8 NOT NULL,
   [stemCUnder] float8 NOT NULL,
   [rootCUnder] float8 NOT NULL
-  [rootdepthCUnder] float8 NOT NULL
-  [rootdepthCOver] float8 NOT NULL
+  [rootdepthUnder] float8 NOT NULL
+  [rootdepthOver] float8 NOT NULL
   [coverfract] float8 NOT NULL
-  [burnCOver] float8 NOT NULL
-  [burnCUnder] float8 NOT NULL
+  [consumedCOver] float8 NOT NULL
+  [consumedCUnder] float8 NOT NULL
   [mortCUnder] float8 NOT NULL
   [mortCOver] float8 NOT NULL
 )
@@ -54,6 +53,9 @@ CREATE TABLE [cube_data_point] (
   [cubeIdx] int,
   [warmingIdx] [key],
   [patchIdx] [key],
+  [patchfamilyIdx] [key],
+  [vegtypeOver] int NOT NULL,
+  [vegtypeUnder] int NOT NULL,
   [date] nvarchar(255) NOT NULL,
   [rain] float8 NOT NULL,
   [Qin] float8 NOT NULL,
@@ -78,11 +80,11 @@ CREATE TABLE [cube_data_point] (
   [leafCUnder] float8 NOT NULL,
   [stemCUnder] float8 NOT NULL,
   [rootCUnder] float8 NOT NULL
-  [rootdepthCUnder] float8 NOT NULL
-  [rootdepthCOver] float8 NOT NULL
+  [rootdepthUnder] float8 NOT NULL
+  [rootdepthOver] float8 NOT NULL
   [coverfract] float8 NOT NULL
-  [burnCOver] float8 NOT NULL
-  [burnCUnder] float8 NOT NULL
+  [consumedCOver] float8 NOT NULL
+  [consumedCUnder] float8 NOT NULL
   [mortCUnder] float8 NOT NULL
   [mortCOver] float8 NOT NULL
 )

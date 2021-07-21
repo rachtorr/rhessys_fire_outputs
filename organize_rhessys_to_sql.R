@@ -7,6 +7,13 @@ library(tm)
 
 # need to update all for climate scenario with climate ID in data frames
 
+# using historic climate as baseline, warming ID = 0 
+# the climate change scenarios will be ID as degrees of warming (1, 2, 4, 6)
+warming = 0
+
+# identify which patch IDs you are using for cubes 
+patchID_cubes = c(1, 2)
+
 #################################################################
 # first table - spatial data point 
 
@@ -20,9 +27,10 @@ sdp_c_patch <- sdp_c %>%
 all_sdp <- inner_join(sdp_p, sdp_c_patch, 
                       by=c('day', 'month', 'year', 'basinID', 'hillID','zoneID', 'patchID')) %>% 
   mutate(date = as.Date(paste(year, month, day, sep="/"))) %>%
-  dplyr::select(-basinID, -hillID, -zoneID, -month, -day, -year) 
+  dplyr::select(-basinID, -hillID, -zoneID, -month, -day, -year) %>%
+  mutate(warmingIdx = warming)
 
-#need to add column for ID, warmingID
+#need to add column for id, not sure what this is 
 
 #################################################################
 
@@ -51,10 +59,8 @@ colnames(aggc_p_grouped) <- c("litterc",
                               "canopyevap",
                               "coverfract", 
                               "streamflow", 
-                              "rootdepth",
                               "vegAccessWater",
-                              "Qin", 
-                              "Qout",
+                              "snowfall",
                               "rain",
                               "date",
                               "groundevap")
@@ -67,21 +73,17 @@ aggc_avg <- aggc_c %>%
   group_by(date, stratumID) %>% 
   summarize_all(mean) 
 
-overunder <- pivot_wider(aggc_avg, names_from=stratumID, values_from=c(trans, netpsn, height, leafC, stemC, rootC, consumedC, mortC, rootdepthC), names_prefix=c("Over","Under"), names_sep = "")
+overunder <- pivot_wider(aggc_avg, names_from=stratumID, values_from=c(trans, netpsn, height, leafC, stemC, rootC, consumedC, mortC, rootdepth), names_prefix=c("Over","Under"), names_sep = "")
 colnames(overunder) <- removeNumbers(names(overunder))
 
-cube_agg <- inner_join(aggc_p_grouped,  overunder, by="date")
-
-# root depth is patch output - not separated into over under here
+cube_agg <- inner_join(aggc_p_grouped,  overunder, by="date") %>%
+  mutate(warmingIdx = warming)
 
 # whats missing:
 # [id] int PRIMARY KEY,
-# [dateIdx] [key],
-# [warmingIdx] [key],
-# [rain] float8 NOT NULL, - this is included, total_water_in = rain + snow + irr; may want to separate out rain and snow though
-# [snowfall] float8 NOT NULL,
-# rootdepthOver
-# rootdepthUnder - these are output as stratum.rootzone.depth, not sure if correct var 
+# [dateIdx] [key], (Date is included, not as ID)
+
+# what is burn variable? 
 
 ############################################################
 # cube_data_point table 
@@ -92,9 +94,10 @@ cubedp_c2 <- read.csv("cube_data_point_c_under.csv")
 
 cube_p_grouped <- cubedp_p %>% 
   mutate(date = as.Date(paste(year, month, day, sep="/"))) %>%
-  group_by(date, patchID) %>% 
-  summarize_all(sum) %>%
-  dplyr::select(-month, -day, -year, -basinID, -hillID, -zoneID)
+  # group_by(date, patchID) %>% 
+  # summarize_all(sum) %>%
+  dplyr::select(-month, -day, -year, -basinID, -hillID, -zoneID) %>%
+  mutate(warmingIdx = warming)
 
 # stratums have already been separated out in the output filter file 
 cube_c_over <- cubedp_c1 %>% 
@@ -116,13 +119,19 @@ cube_c_under <- cubedp_c2 %>%
 overunder <- inner_join(cube_c_under, cube_c_over, by=c("date","patchID"))
 allcube_dp <- right_join(overunder, cube_p_grouped) 
 
+vegids <- read.csv("vegid.csv")
+vegpatch <- pivot_wider(vegids, id_cols=patchID, values_from = vegID, names_from = canopy, names_prefix = "vegtype")
+vegpatch$vegtypeOver[is.na(vegpatch$vegtypeOver)] <- 0
+vegpatch$vegtypeUnder[is.na(vegpatch$vegtypeUnder)] <- 0
+
+allcube_veg = left_join(allcube_dp, vegpatch, by='patchID')
+
+
 # names left over
 # CREATE TABLE [cube_data_point] (
 #   [id] int PRIMARY KEY,
 #   [dateIdx] [key],
 #   [cubeIdx] int,
-#   [warmingIdx] [key],
-#   [rain] float8 NOT NULL, - included as total_water_in
-#   [snowfall] float8 NOT NULL
+#   [patchfamilyIdx] [key],
 # )
-# also ask about percent_cover - might not be family output
+

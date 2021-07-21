@@ -3,6 +3,16 @@ filter:
 	output:
 		format: csv
 		path: "../out/test"
+		filename: "spatial_data_zone"
+	zone:
+		ids: 1
+        variables: snow, rain
+
+filter:
+	timestep: daily
+	output:
+		format: csv
+		path: "../out/test"
 		filename: "spatial_data_point_stratumvar"
 	stratum:
 		ids: 1
@@ -40,11 +50,9 @@ filter:
 		patch.evaporation,
 		patch.family_pct_cover, 
 		patch.streamflow,
-		patch.rootzone.depth,
 		patch.rz_storage,
-		patch.Qin, 
-		patch.Qout,
-		patch.total_water_in 
+		zone.snow,
+		zone.rain
 
 filter:
 	timestep: daily
@@ -62,7 +70,7 @@ filter:
 				 rootC = cs.frootc + cs.live_crootc + cs.dead_crootc,
 				 consumedC = fe.canopy_target_prop_c_consumed,
 				 mortC = fe.canopy_target_prop_c_remain_adjusted + fe.canopy_target_prop_c_remain_adjusted_leafc,
-				 rootdepthC = rootzone.depth
+				 rootdepth = rootzone.depth
 		
 				
 filter:
@@ -100,7 +108,7 @@ filter:
 				 leafCUnder = cs.leafc + cs.leafc_store,
 				 stemCUnder = cs.live_stemc + cs.dead_stemc,
 				 rootCUnder = cs.frootc + cs.live_crootc + cs.dead_crootc,
-				 rootdepthCUnder = rootzone.depth
+				 rootdepthUnder = rootzone.depth
 				
 filter:
 	timestep: daily
@@ -124,7 +132,8 @@ filter:
 		    vegAccessWater = rz_storage,
 		    Qin, 
 		    Qout,
-		    rain = total_water_in 
+		    zone.rain, 
+		    zone.snow
 
 
 
