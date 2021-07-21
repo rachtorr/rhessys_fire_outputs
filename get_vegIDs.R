@@ -2,6 +2,7 @@
 # read in worldfile, identify patches, output veg types 
 setwd("~/Documents/BigCreek7.2ForExample/out/test/")
 
+# change this to wherever the worldfile is 
 smallworld <- read.table("~/Documents/BigCreek7.2ForExample/worldfiles/bcsmall.world.su", quote="\"", comment.char="")
 
 colnames(smallworld) <- c("value", "name")
