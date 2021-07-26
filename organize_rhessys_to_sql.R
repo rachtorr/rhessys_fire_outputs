@@ -1,9 +1,10 @@
 # organizing rhessys outputs, from output filters, to be input to future mountain SQL 
 # based on variables given in FB_DB.sql
 #setwd("~/fire/")
-setwd("~/Documents/BigCreek7.2ForExample/out/test/")
+setwd("~/Documents/BigCreek7.2ForExample/out/bigcreek/")
 library(tidyverse)
 library(tm)
+library(RSQLite)
 
 # need to update all for climate scenario with climate ID in data frames
 
@@ -12,7 +13,7 @@ library(tm)
 warming = 0
 
 # identify which patch IDs you are using for cubes 
-patchID_cubes = c(1, 2)
+# patchID_cubes = c(1, 2)
 
 #################################################################
 # first table - spatial data point 
@@ -39,16 +40,20 @@ all_sdp <- inner_join(sdp_p, sdp_c_patch,
 # need to separate over and unders 
 # some of the outputs are missing
 aggc_p <- read.csv("cube_agg_p.csv")
-aggc_c <- read.csv("cube_agg_c.csv")
 
 # grouping by date only 
 aggc_p_grouped <- aggc_p %>% 
   mutate(date = as.Date(paste(year, month, day, sep="/"))) %>% 
   mutate(groundevap = evaporation_surf + 
            exfiltration_unsat_zone +
-           exfiltration_sat_zone) %>%
+           exfiltration_sat_zone,
+         trans = transpiration_sat_zone + transpiration_unsat_zone,
+         leafC = cs.leafc + cs.leafc_store,
+         stemC = cs.live_stemc + cs.dead_stemc,
+         rootC = cs.frootc + cs.live_crootc + cs.dead_crootc,
+         mortC = fe.canopy_target_prop_c_remain_adjusted + fe.canopy_target_prop_c_remain_adjusted_leafc) %>%
   dplyr::select(-basinID, -day, -month, -year,
-                -evaporation_surf, -exfiltration_unsat_zone, -exfiltration_sat_zone) 
+                -evaporation_surf, -exfiltration_unsat_zone, -exfiltration_sat_zone, -transpiration_sat_zone, -transpiration_unsat_zone, -cs.leafc, -cs.leafc_store, -cs.live_stemc, -cs.dead_stemc, -cs.frootc, -cs.live_crootc, -cs.dead_crootc, -fe.canopy_target_prop_c_remain_adjusted, -fe.canopy_target_prop_c_remain_adjusted_leafc) 
   
 
 colnames(aggc_p_grouped) <- c("litterc", 
@@ -62,28 +67,28 @@ colnames(aggc_p_grouped) <- c("litterc",
                               "vegAccessWater",
                               "snowfall",
                               "rain",
+                              "netpsn",
+                              "height",
+                              "consumedC",
+                              "rootdepth",
                               "date",
-                              "groundevap")
+                              "groundevap",
+                              "trans",
+                              "leafC",
+                              "stemC",
+                              "rootC",
+                              "mortC")
 
-# group stratum into over and under 
-aggc_avg <- aggc_c %>% 
-  mutate(date = as.Date(paste(year, month, day, sep="/"))) %>%
-  dplyr::select(-month, -day, -year,
-                -basinID, -hillID, -zoneID, -patchID) %>% 
-  group_by(date, stratumID) %>% 
-  summarize_all(mean) 
-
-overunder <- pivot_wider(aggc_avg, names_from=stratumID, values_from=c(trans, netpsn, height, leafC, stemC, rootC, consumedC, mortC, rootdepth), names_prefix=c("Over","Under"), names_sep = "")
-colnames(overunder) <- removeNumbers(names(overunder))
-
-cube_agg <- inner_join(aggc_p_grouped,  overunder, by="date") %>%
+cube_agg <- aggc_p_grouped %>%
   mutate(warmingIdx = warming)
 
 # whats missing:
 # [id] int PRIMARY KEY,
 # [dateIdx] [key], (Date is included, not as ID)
+# vegtype 
 
-# what is burn variable? 
+# what does burn mean? is it 1/0 burn took place in patch? 
+
 
 ############################################################
 # cube_data_point table 
@@ -135,3 +140,7 @@ allcube_veg = left_join(allcube_dp, vegpatch, by='patchID')
 #   [patchfamilyIdx] [key],
 # )
 
+###############################################################
+# convert to sqlite
+
+newdb <- src_sqlite("../../rhessys_fire_outputs/FB_DB.sql", create=T)

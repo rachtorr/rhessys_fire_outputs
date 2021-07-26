@@ -42,22 +42,25 @@ filter:
 		patch.streamflow,
 		patch.rz_storage,
 		zone.snow,
-		zone.rain,
-		stratum.transpiration_sat_zone,
-		stratum.transpiration_unsat_zone,
-        stratum.cs.net_psn,
-		stratum.epv.height,
-		stratum.cs.leafc,
-		stratum.cs.leafc_store,
-		stratum.cs.live_stemc,
-		stratum.cs.dead_stemc,
-	    stratum.cs.frootc,
-	    stratum.cs.live_crootc,
-	    stratum.cs.dead_crootc,
-		stratum.fe.canopy_target_prop_c_consumed,
-		stratum.fe.canopy_target_prop_c_remain_adjusted,
-		stratum.fe.canopy_target_prop_c_remain_adjusted_leafc,
-		stratum.rootzone.depth
+		zone.rain
+
+filter:
+	timestep: daily
+	output:
+		format: csv
+		path: "../out/bigcreek"
+		filename: "cube_agg_c"
+	stratum:
+		ids: 1
+		variables: trans= transpiration_sat_zone + transpiration_unsat_zone,
+                netpsn = cs.net_psn,
+				 height = epv.height,
+				 leafC = cs.leafc + cs.leafc_store,
+				 stemC = cs.live_stemc + cs.dead_stemc,
+				 rootC = cs.frootc + cs.live_crootc + cs.dead_crootc,
+				 consumedC = fe.canopy_target_prop_c_consumed,
+				 mortC = fe.canopy_target_prop_c_remain_adjusted + fe.canopy_target_prop_c_remain_adjusted_leafc,
+				 rootdepth = rootzone.depth
 		
 				
 filter:
