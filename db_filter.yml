@@ -17,8 +17,7 @@ filter:
 	patch:
 		ids: 1
 		variables: snowpack = snowpack.water_equivalent_depth,
-		           burn,
-		           elevation=z
+		           burn
 		           
 filter:
 	timestep: daily

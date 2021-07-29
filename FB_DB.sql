@@ -5,7 +5,6 @@ CREATE TABLE [spatial_data_point] (
   [dateIdx] [key],
   [snowpack] float8 NOT NULL,
   [plantC] float8 NOT NULL,
-  [elevation] int
 )
 GO
 
@@ -21,29 +20,20 @@ CREATE TABLE [aggcube_data_point] (
   [snowpack] float8 NOT NULL,
   [groundevap] float8 NOT NULL,
   [canopyevap] float8 NOT NULL,
-  [netpsnOver] float8 NOT NULL,
-  [netpsnUnder] float8 NOT NULL,
+  [netpsn] float8 NOT NULL,
   [depthToGW] float8 NOT NULL,
   [vegAccessWater] float8 NOT NULL,
   [litterC] float8 NOT NULL,
   [soilC] float8 NOT NULL,
-  [heightOver] float8 NOT NULL,
-  [transOver] float8 NOT NULL,
-  [heightUnder] float8 NOT NULL,
-  [transUnder] float8 NOT NULL,
-  [leafCOver] float8 NOT NULL,
-  [stemCOver] float8 NOT NULL,
-  [rootCOver] float8 NOT NULL,
-  [leafCUnder] float8 NOT NULL,
-  [stemCUnder] float8 NOT NULL,
-  [rootCUnder] float8 NOT NULL
-  [rootdepthUnder] float8 NOT NULL
-  [rootdepthOver] float8 NOT NULL
-  [coverfract] float8 NOT NULL
-  [consumedCOver] float8 NOT NULL
-  [consumedCUnder] float8 NOT NULL
-  [mortCUnder] float8 NOT NULL
-  [mortCOver] float8 NOT NULL
+  [height] float8 NOT NULL,
+  [trans] float8 NOT NULL,
+  [leafC] float8 NOT NULL,
+  [rootC] float8 NOT NULL,
+  [stemC] float8 NOT NULL,
+  [rootdepth] float8 NOT NULL,
+  [coverfract] float8 NOT NULL,
+  [consumedC] float8 NOT NULL,
+  [mortC] float8 NOT NULL
 )
 GO
 
