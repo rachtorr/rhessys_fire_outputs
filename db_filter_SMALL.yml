@@ -2,29 +2,21 @@ filter:
 	timestep: daily
 	output:
 		format: csv
-		path: "../out/bigcreek"
-		filename: "spatial_data_point_stratumvar"
-	stratum:
-		ids: 1
-        variables: plantc = cs.leafc+cs.live_stemc+cs.dead_stemc
-        
-filter:
-	timestep: daily
-	output:
-		format: csv
-		path: "../out/bigcreek"
+		path: "../out/test"
 		filename: "spatial_data_point_patchvar"
 	patch:
 		ids: 1
 		variables: snowpack = snowpack.water_equivalent_depth,
-		           burn,
-		           elevation=z
+		           stratum.cs.leafc,
+		           stratum.cs.live_stemc,
+		           stratum.cs.dead_stemc,
+		           burn
 		           
 filter:
 	timestep: daily
 	output:
 		format: csv
-		path: "../out/bigcreek"
+		path: "../out/test"
 		filename: "cube_agg_p"
 	basin:
 		ids: 1
@@ -64,7 +56,7 @@ filter:
 	timestep: daily
 	output:
 		format: csv
-		path: "../out/bigcreek"
+		path: "../out/test"
 		filename: "cube_data_point_c_over"
 	stratum:
 		ids: 1:1:1:1
@@ -83,7 +75,7 @@ filter:
 	timestep: daily
 	output:
 		format: csv
-		path: "../out/bigcreek"
+		path: "../out/test"
 		filename: "cube_data_point_c_under"
 	stratum:
 		ids: 1:1:1:1:2
@@ -101,7 +93,7 @@ filter:
 	timestep: daily
 	output:
 		format: csv
-		path: "../out/bigcreek"
+		path: "../out/test"
 		filename: "cube_data_point_p"
 	patch:
 		ids: 1:1:1:1

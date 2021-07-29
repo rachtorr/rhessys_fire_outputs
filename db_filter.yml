@@ -3,20 +3,13 @@ filter:
 	output:
 		format: csv
 		path: "../out/bigcreek"
-		filename: "spatial_data_point_stratumvar"
-	stratum:
-		ids: 1
-        variables: plantc = cs.leafc+cs.live_stemc+cs.dead_stemc
-        
-filter:
-	timestep: daily
-	output:
-		format: csv
-		path: "../out/bigcreek"
 		filename: "spatial_data_point_patchvar"
 	patch:
 		ids: 1
 		variables: snowpack = snowpack.water_equivalent_depth,
+		           stratum.cs.leafc,
+		           stratum.cs.live_stemc,
+		           stratum.cs.dead_stemc,
 		           burn
 		           
 filter:
