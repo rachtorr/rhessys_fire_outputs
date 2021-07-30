@@ -4,7 +4,6 @@
 setwd("~/Documents/BigCreek7.2ForExample/out/bigcreek/")
 library(tidyverse)
 library(tm)
-library(RSQLite)
 
 # need to update all for climate scenario with climate ID in data frames
 
@@ -17,18 +16,15 @@ warming = 0
 
 #################################################################
 # first table - spatial data point 
-
+setwd("../test/")
 sdp_p <- read.csv("spatial_data_point_patchvar.csv")
-sdp_c <- read.csv("spatial_data_point_stratumvar.csv")
 
-sdp_c_patch <- sdp_c %>% 
-  group_by(day, month, year, basinID, hillID, zoneID, patchID) %>%
-  summarize_at(vars(plantc), list(sum))
 
-all_sdp <- inner_join(sdp_p, sdp_c_patch, 
-                      by=c('day', 'month', 'year', 'basinID', 'hillID','zoneID', 'patchID')) %>% 
-  mutate(date = as.Date(paste(year, month, day, sep="/"))) %>%
-  dplyr::select(-basinID, -hillID, -zoneID, -month, -day, -year) %>%
+all_sdp <- sdp_p %>%
+  mutate(plantc = cs.leafc + cs.live_stemc + cs.dead_stemc,
+    date = as.Date(paste(year, month, day, sep="/"))) %>%
+  dplyr::select(patchfamilyIdx = patchID, 
+                plantc, snowpack, date) %>%
   mutate(warmingIdx = warming)
 
 #need to add column for id, not sure what this is 
@@ -80,12 +76,12 @@ colnames(aggc_p_grouped) <- c("litterc",
                               "mortC")
 
 cube_agg <- aggc_p_grouped %>%
-  mutate(warmingIdx = warming)
+  mutate(warmingIdx = warming,
+         vegtype = 50)
 
-# whats missing:
+# whats missing (to be added when passed to mysql:
 # [id] int PRIMARY KEY,
 # [dateIdx] [key], (Date is included, not as ID)
-# vegtype 
 
 # what does burn mean? is it 1/0 burn took place in patch? 
 
@@ -129,18 +125,19 @@ vegpatch <- pivot_wider(vegids, id_cols=patchID, values_from = vegID, names_from
 vegpatch$vegtypeOver[is.na(vegpatch$vegtypeOver)] <- 0
 vegpatch$vegtypeUnder[is.na(vegpatch$vegtypeUnder)] <- 0
 
-allcube_veg = left_join(allcube_dp, vegpatch, by='patchID')
+allcube_veg = left_join(allcube_dp, vegpatch, by='patchID') %>% 
+  mutate(patchfamilyIdx = patchID) %>%
+  dplyr::select(-patchID)
 
 
 # names left over
 # CREATE TABLE [cube_data_point] (
 #   [id] int PRIMARY KEY,
 #   [dateIdx] [key],
-#   [cubeIdx] int,
+#   [cubeIdx] int, ## is this same as patch??
 #   [patchfamilyIdx] [key],
 # )
 
 ###############################################################
-# convert to sqlite
+# convert to sql
 
-newdb <- src_sqlite("../../rhessys_fire_outputs/FB_DB.sql", create=T)

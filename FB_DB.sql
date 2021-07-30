@@ -4,7 +4,7 @@ CREATE TABLE [spatial_data_point] (
   [patchfamilyIdx] [key],
   [dateIdx] [key],
   [snowpack] float8 NOT NULL,
-  [plantC] float8 NOT NULL,
+  [plantC] float8 NOT NULL
 )
 GO
 
