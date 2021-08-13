@@ -2,6 +2,7 @@
 # based on variables given in FB_DB.sql
 #setwd("~/fire/")
 setwd("~/Documents/BigCreek7.2ForExample/out/bigcreek/")
+setwd("~/Documents/BigCreek7.2ForExample/out/bigcreek_salience_archive/randseed1/")
 library(tidyverse)
 library(tm)
 
@@ -9,23 +10,70 @@ library(tm)
 
 # using historic climate as baseline, warming ID = 0 
 # the climate change scenarios will be ID as degrees of warming (1, 2, 4, 6)
-warming = 0
+warming = 2
 
 # identify which patch IDs you are using for cubes 
 # patchID_cubes = c(1, 2)
 
 #################################################################
 # first table - spatial data point 
-setwd("../test/")
-sdp_p <- read.csv("spatial_data_point_patchvar.csv")
+#setwd("../test/")
+#sdp_p <- read.csv("spatial_data_point_patchvar.csv")
+# read in as netcdf 
+library(ncdf4)
+library(raster)
+
+basin <- nc_open("../bigcreek/spatial_data_point_patchvar.nc")
+
+plantcleaf = ncvar_get(basin, "cs.leafc")  
+dfspace$plantc = as.data.frame(plantcleaf)
+#colnames(dfspace) <- "plantc"
+rm(plantcleaf)
+plantcstem = ncvar_get(basin, "cs.live_stemc")
+dfspace$plantc = dfspace$plantc + as.data.frame(plantcstem)
+rm(plantcstem)
+plantcdead = ncvar_get(basin, "cs.dead_stemc")
+dfspace$plantc = dfspace$plantc + as.data.frame(plantcdead)
+rm(plantcdead)
+
+snow = ncvar_get(basin, "snowpack")
+dfspace$snowpack = as.data.frame(snow)
+rm(snow)
+burn = ncvar_get(basin, "burn")
+dfspace$burn = as.data.frame(burn)
+rm(burn)
+patches = ncvar_get(basin, "patchID")
+dfspace$patchfamilyIdx = as.data.frame(patches) 
+rm(patches)
+
+nc_close(basin)
+# stop and send to sql 
+rm(dfspace)
+
+# next steps: load in dates, 
+day = ncvar_get(basin, "day")
+dfspace = as.data.frame(day)
+rm(day)
+month = ncvar_get(basin, "month")
+dfspace$month = as.data.frame(month)
+rm(month)
+year = ncvar_get(basin, "year")
+dfspace$year = as.data.frame(year)
+rm(year)
+nc_close(basin)
 
 
-all_sdp <- sdp_p %>%
-  mutate(plantc = cs.leafc + cs.live_stemc + cs.dead_stemc,
-    date = as.Date(paste(year, month, day, sep="/"))) %>%
-  dplyr::select(patchfamilyIdx = patchID, 
-                plantc, snowpack, date) %>%
-  mutate(warmingIdx = warming)
+# too slow 
+dfspace <- dfspace %>% 
+  unite("date", day:month:year, sep= "-", 
+      remove = TRUE)
+
+# all_sdp <- sdp_p %>%
+#   mutate(plantc = cs.leafc + cs.live_stemc + cs.dead_stemc,
+#     date = as.Date(paste(year, month, day, sep="/"))) %>%
+#   dplyr::select(patchfamilyIdx = patchID, 
+#                 plantc, snowpack, date) %>%
+#   mutate(warmingIdx = warming)
 
 #need to add column for id, not sure what this is 
 
@@ -83,8 +131,21 @@ cube_agg <- aggc_p_grouped %>%
 # [id] int PRIMARY KEY,
 # [dateIdx] [key], (Date is included, not as ID)
 
-# what does burn mean? is it 1/0 burn took place in patch? 
+# what does burn mean for aggregated? is it 1/0 burn took place in patch? 
 
+ggplot(cube_agg) + geom_line(aes(x=date, y=burn))
+ggplot(cube_agg) + geom_line(aes(x=date, y=stemC))
+ggplot(cube_agg) + geom_line(aes(x=date, y=consumedC))
+ggplot(cube_agg) + geom_line(aes(x=date, y=mortC))
+
+firesize <- read.delim("../../scriptsFire/FireSizes0.txt")
+colnames(firesize) <- cnames <- c("fire_size",
+                                  "year",
+                                  "month",
+                                  "wind_dir",
+                                  "wind_spd",
+                                  "num_ign")
+ggplot(firesize) + geom_line(aes(x=year, y=fire_size))
 
 ############################################################
 # cube_data_point table 
@@ -118,16 +179,20 @@ cube_c_under <- cubedp_c2 %>%
 
 
 overunder <- inner_join(cube_c_under, cube_c_over, by=c("date","patchID"))
-allcube_dp <- right_join(overunder, cube_p_grouped) 
-
-vegids <- read.csv("vegid.csv")
-vegpatch <- pivot_wider(vegids, id_cols=patchID, values_from = vegID, names_from = canopy, names_prefix = "vegtype")
-vegpatch$vegtypeOver[is.na(vegpatch$vegtypeOver)] <- 0
-vegpatch$vegtypeUnder[is.na(vegpatch$vegtypeUnder)] <- 0
-
-allcube_veg = left_join(allcube_dp, vegpatch, by='patchID') %>% 
-  mutate(patchfamilyIdx = patchID) %>%
+allcube_dp <- right_join(overunder, cube_p_grouped) %>% 
+  mutate(patchfamilyIdx = patchID) %>% 
   dplyr::select(-patchID)
+
+ggplot(allcube_dp) + geom_line(aes(x=date, y=stemCOver, col=as.factor(patchfamilyIdx), linetype='over')) + geom_line(aes(x=date, y=stemCUnder, col=as.factor(patchfamilyIdx), linetype='under'))
+
+vegids <- read.csv("~/Documents/BigCreek7.2ForExample/rhessys_fire_outputs/vegIDs_cube_data.txt")
+
+# vegids <- read.csv("vegid.csv")
+# vegpatch <- pivot_wider(vegids, id_cols=patchID, values_from = vegID, names_from = canopy, names_prefix = "vegtype")
+# vegpatch$vegtypeOver[is.na(vegpatch$vegtypeOver)] <- 0
+# vegpatch$vegtypeUnder[is.na(vegpatch$vegtypeUnder)] <- 0
+
+allcube_veg = left_join(allcube_dp, vegids, by='patchfamilyIdx') 
 
 
 # names left over

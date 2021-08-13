@@ -1,0 +1,6 @@
+patchfamilyIdx, vegtypeOver, vegtypeUnder
+162724, 7, 51
+75516, 7, 51
+82782, 7, 51
+212962, 50, 1
+139188, 50, 1
