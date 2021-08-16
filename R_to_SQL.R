@@ -16,19 +16,13 @@ dbSendStatement(con, "ALTER TABLE aggcube_data_point
                 ADD id int PRIMARY KEY,
                 ADD dateIdx int UNIQUE KEY,
                 ADD UNIQUE KEY (warmingIdx)")
-
-# spatial data 
-dbWriteTable(con, "spatial_data_point", dfspace) 
-dbSendStatement(con, "ALTER TABLE spatial_data_point
-                ADD id int PRIMARY KEY,
-                ADD warmingIdx int UNIQUE KEY,
-                ADD UNIQUE KEY (patchfamilyIdx)")
-dbListFields(con, "spatial_data_point")
+# then to add warming scenarios to this table 
+db_insert_into(con, "aggcube_data_point", cube_agg)
 
 
 # individual cubes
+# to write the first table
 dbWriteTable(con, "cube_data_point", allcube_veg) 
-
 dbSendStatement(con, "ALTER TABLE cube_data_point
                 ADD id int PRIMARY KEY,
                 ADD dateIdx int UNIQUE KEY,
@@ -36,7 +30,19 @@ dbSendStatement(con, "ALTER TABLE cube_data_point
                 ADD UNIQUE KEY (patchfamilyIdx),
                 ADD UNIQUE KEY (warmingIdx)")
 dbListFields(con, "cube_data_point")
+# then to add warming scenarios to this table 
+db_insert_into(con, "cube_data_point", allcube_veg)
 
+
+# spatial data 
+RMariaDB::dbWriteTable(con, "spatial_data_point2", dfspace) 
+dbSendStatement(con, "ALTER TABLE spatial_data_point
+                ADD id int PRIMARY KEY,
+                ADD warmingIdx int UNIQUE KEY,
+                ADD UNIQUE KEY (patchfamilyIdx)")
+dbListFields(con, "spatial_data_point")
+
+## Other SQL command examples
 # to delete
 dbSendStatement(con, "DROP TABLE cube_data_point")
 
