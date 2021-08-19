@@ -35,16 +35,17 @@ db_insert_into(con, "cube_data_point", allcube_veg)
 
 
 # spatial data 
-RMariaDB::dbWriteTable(con, "spatial_data_point2", dfspace) 
+RMariaDB::dbWriteTable(con, "spatial_data_point", dfspace) 
 dbSendStatement(con, "ALTER TABLE spatial_data_point
                 ADD id int PRIMARY KEY,
                 ADD warmingIdx int UNIQUE KEY,
                 ADD UNIQUE KEY (patchfamilyIdx)")
 dbListFields(con, "spatial_data_point")
+db_insert_into(con, "spatial_data_point", dfspace)
 
 ## Other SQL command examples
 # to delete
-dbSendStatement(con, "DROP TABLE cube_data_point")
+dbSendStatement(con, "DROP TABLE spatial_data_point")
 
 # send queries
 res <- RMariaDB::dbSendQuery(con, "SELECT * FROM cube_data_point limit 10;")

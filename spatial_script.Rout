@@ -1,0 +1,102 @@
+
+R version 4.0.3 (2020-10-10) -- "Bunny-Wunnies Freak Out"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+── Attaching packages ─────────────────────────────────────── tidyverse 1.3.0 ──
+✔ ggplot2 3.3.2     ✔ purrr   0.3.4
+✔ tibble  3.0.3     ✔ dplyr   1.0.2
+✔ tidyr   1.1.2     ✔ stringr 1.4.0
+✔ readr   1.3.1     ✔ forcats 0.5.0
+
+
+Attaching package: ‘RHESSysPreprocessing’
+
+The following object is masked from ‘package:RHESSysIOinR’:
+
+    read_world
+
+Loading required package: sp
+
+Attaching package: ‘raster’
+
+The following object is masked from ‘package:dplyr’:
+
+    select
+
+The following object is masked from ‘package:tidyr’:
+
+    extract
+
+
+Attaching package: ‘gridExtra’
+
+The following object is masked from ‘package:dplyr’:
+
+    combine
+
+rgdal: version: 1.5-16, (SVN revision 1050)
+Geospatial Data Abstraction Library extensions to R successfully loaded
+Loaded GDAL runtime: GDAL 3.1.1, released 2020/06/22
+Path to GDAL shared files: /Library/Frameworks/R.framework/Versions/4.0/Resources/library/rgdal/gdal
+GDAL binary built with GEOS: TRUE 
+Loaded PROJ runtime: Rel. 6.3.1, February 10th, 2020, [PJ_VERSION: 631]
+Path to PROJ shared files: /Library/Frameworks/R.framework/Versions/4.0/Resources/library/rgdal/proj
+Linking to sp version:1.4-2
+To mute warnings of possible GDAL/OSR exportToProj4() degradation,
+use options("rgdal_show_exportToProj4_warnings"="none") before loading rgdal.
+> # OSX
+> # brew install mariadb-connector-c
+> # brew install mysql-connector-c
+> 
+> setwd("~/Documents/BigCreek7.2ForExample/out/bigcreek/")
+> warming = 2
+> 
+> library(ncdf4)
+> library(RMariaDB)
+> library(RMySQL)
+Loading required package: DBI
+> library(DBI)
+> 
+> basin <- nc_open("spatial_data_point_patchvar.nc")
+> 
+> # next steps: load in dates, 
+> day = ncvar_get(basin, "day")
+> dfspace = as.data.frame(day)
+> rm(day)
+> month = ncvar_get(basin, "month")
+> dfspace$month = as.matrix(month)
+> rm(month)
+> year = ncvar_get(basin, "year")
+> dfspace$year = as.matrix(year)
+> rm(year)
+> plantcleaf = ncvar_get(basin, "cs.leafc")  
+> dfspace$plantc = as.matrix(plantcleaf)
+> rm(plantcleaf)
+> plantcstem = ncvar_get(basin, "cs.live_stemc")
+> dfspace$plantc = dfspace$plantc + as.matrix(plantcstem)
+> rm(plantcstem)
+> plantcdead = ncvar_get(basin, "cs.dead_stemc")
+> dfspace$plantc = dfspace$plantc + as.matrix(plantcdead)
+> rm(plantcdead)
+> snow = ncvar_get(basin, "snowpack")
+> dfspace$snowpack = as.matrix(snow)
+> rm(snow)
+> burn = ncvar_get(basin, "burn")
+> dfspace$burn = as.matrix(burn)
+> rm(burn)
+> patches = ncvar_get(basin, "patchID")
