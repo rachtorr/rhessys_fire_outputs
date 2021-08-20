@@ -34,10 +34,13 @@ cursor.execute(insert_q, insert_val)
 con.commit()
 
 # single column? keep getting syntax errors
-insert_q = "INSERT INTO spatial_data_point2 (plantc, snowpack) VALUES (%s, %s)"
-insert_val = (plantc.data.tolist(), snow) 
+insert_q = """INSERT INTO spatial_data_point2 (snowpack, plantC) VALUES (%s, %s)"""
+x = snow
+y= plantc.data.tolist()
+insert_val = (x, y) 
 
 # several rows 
+# keep getting stupid error with executemany, not sure why. no errors thrown when using the exact same insert_q with execute()
 result = cursor.executemany(insert_q, insert_val)
 result
 con.commit()

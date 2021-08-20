@@ -43,7 +43,7 @@ rm(patches)
 
 nc_close(basin)
 
-dfspaces$warmingIdx = warming
+dfspace$warmingIdx = warming
 
 # send to mysql
 con = dbConnect(RMariaDB::MariaDB(), user = 'root', password = '',host = 'localhost', port=3306, db="BigCreek_FutMtn")

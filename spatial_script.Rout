@@ -100,3 +100,18 @@ Loading required package: DBI
 > dfspace$burn = as.matrix(burn)
 > rm(burn)
 > patches = ncvar_get(basin, "patchID")
+> dfspace$patchfamilyIdx = as.matrix(patches) 
+> rm(patches)
+> 
+> nc_close(basin)
+> 
+> dfspace$warmingIdx = warming
+> 
+> # send to mysql
+> con = dbConnect(RMariaDB::MariaDB(), user = 'root', password = '',host = 'localhost', port=3306, db="BigCreek_FutMtn")
+Warning message:
+Invalid time zone 'UTC', falling back to local time.
+Set the `timezone` argument to a valid time zone.
+CCTZ: Unrecognized timezone of the input vector: "" 
+> RMySQL::dbWriteTable(con, "spatial_data_point", dfspace) 
+Error: Error writing file '/var/tmp/MLgitAZf' (OS errno 28 - No space left on device) [3]
