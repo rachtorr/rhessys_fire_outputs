@@ -1,7 +1,7 @@
 filter:
 	timestep: daily
 	output:
-		format: netcdf
+		format: csv
 		path: "../out/bigcreek"
 		filename: "spatial_data_point_patchvar"
 	patch:

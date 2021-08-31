@@ -12,7 +12,7 @@ con = dbConnect(RMariaDB::MariaDB(), user = 'root', password = '',host = 'localh
 
 # using historic climate as baseline, warming ID = 0 
 # the climate change scenarios will be ID as degrees of warming (1, 2, 4, 6)
-warming = 1
+warming = 0
 
 ################################################################
 # first table is aggcube #######################################
@@ -78,18 +78,20 @@ colnames(firesize) <- cnames <- c("fire_size",
                                   "num_ign")
 ggplot(firesize) + geom_line(aes(x=year, y=fire_size))
 ############################################################
+### write to .csv 
+write.csv(cube_agg, "aggcube_data_point.csv")
 
 # create new table and write to it (only need to do this once)
 #dbWriteTable(con, "aggcube_data_point", cube_agg)
 #dbListTables(con)
-dbListFields(con, "aggcube_data_point")
-# dbSendStatement(con, "ALTER TABLE aggcube_data_point
-#                 ADD id int PRIMARY KEY,
-#                 ADD dateIdx int UNIQUE KEY,
-#                 ADD UNIQUE KEY (warmingIdx)")
-
-# after setting up table the first time, add rows to it 
-db_insert_into(con, "aggcube_data_point", cube_agg)
+# dbListFields(con, "aggcube_data_point")
+# # dbSendStatement(con, "ALTER TABLE aggcube_data_point
+# #                 ADD id int PRIMARY KEY,
+# #                 ADD dateIdx int UNIQUE KEY,
+# #                 ADD UNIQUE KEY (warmingIdx)")
+# 
+# # after setting up table the first time, add rows to it 
+# db_insert_into(con, "aggcube_data_point", cube_agg)
 
 
 # cube_data_point table ####################################
@@ -141,6 +143,10 @@ allcube_veg = left_join(allcube_dp, vegids, by='patchfamilyIdx')
 #   [patchfamilyIdx] [key],
 # )
 
+## write to csv
+write.csv(allcube_dp, "cube_data_point.csv")
+
+
 # convert individual cubes to sql #########################
 
 # to write the first table
@@ -151,8 +157,8 @@ allcube_veg = left_join(allcube_dp, vegids, by='patchfamilyIdx')
 #                 ADD cubeIdx int UNIQUE KEy, 
 #                 ADD UNIQUE KEY (patchfamilyIdx),
 #                 ADD UNIQUE KEY (warmingIdx)")
-dbListFields(con, "cube_data_point")
-# then to add warming scenarios to this table 
-db_insert_into(con, "cube_data_point", allcube_veg)
-
-dbDisconnect(con)
+# dbListFields(con, "cube_data_point")
+# # then to add warming scenarios to this table 
+# db_insert_into(con, "cube_data_point", allcube_veg)
+# 
+# dbDisconnect(con)

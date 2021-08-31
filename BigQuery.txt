@@ -1,0 +1,30 @@
+CREATE OR REPLACE TABLE test.spatial as 
+SELECT safe_add(cs_dead_stemc, cs_live_stemc) as stemc, cs_leafc, patchfamilyIdx, day, month, year, snowpack, burn
+FROM test.spatial;
+
+CREATE OR REPLACE TABLE test.spatial as 
+SELECT patchfamilyIdx, safe_add(stemc, cs_leafc) as plantc, day, month, year, snowpack, burn
+FROM test.spatial;
+
+CREATE OR REPLACE TABLE test.spatial as 
+SELECT DATE(year, month, day) as `date`, plantc, patchfamilyIdx, snowpack, burn 
+FROM test.spatial; 
+
+ALTER TABLE test.spatial
+ADD COLUMN warmingIdx INT;
+
+CREATE OR REPLACE TABLE `test.spatial` AS
+SELECT
+  6 AS warmingIdx, plantc, patchfamilyIdx, snowpack, burn, date  
+FROM
+  `test.spatial`;
+
+DROP TABLE test.plantc;
+
+SELECT
+  *
+FROM
+  `level-harbor-283001.test.spatial` 
+  ORDER BY `date`
+LIMIT
+  10;
